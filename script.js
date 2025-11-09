@@ -1,0 +1,47 @@
+import * as THREE from "three";
+import * as methods from "/methods.js";
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.style.margin = 0;
+document.body.style.overflow = "hidden";
+
+renderer.setAnimationLoop(animate);
+document.body.appendChild(renderer.domElement);
+
+document.body.addEventListener("keydown", function (event) {
+    pressedKeys[event.code] = true;
+});
+document.body.addEventListener("keyup", function (event) {
+    pressedKeys[event.code] = false;
+});
+
+let pressedKeys = {};
+document.addEventListener("wheel", (event) => {
+    camera.position.z += event.deltaY > 0 ? 0.3 : -0.3;
+});
+document.body.addEventListener("click", function () {
+    document.body.requestFullscreen();
+});
+camera.position.z = 5;
+
+function draw() {
+    scene.add(methods.drawBulb(0, 0, 2));
+    scene.add(methods.drawBulb(5, 5, 3));
+}
+draw();
+function animate() {
+    renderer.render(scene, camera);
+
+    if (pressedKeys["KeyW"]) camera.position.y += speed; // forward
+    if (pressedKeys["KeyS"]) camera.position.y -= speed; // backward
+    if (pressedKeys["KeyA"]) camera.position.x -= speed; // left
+    if (pressedKeys["KeyD"]) camera.position.x += speed; // right
+}
