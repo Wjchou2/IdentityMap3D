@@ -1,3 +1,30 @@
 html, body {
   overscroll-behavior: none;
 }
+#inputContainer{
+  position: fixed;
+  width: 25%;
+  aspect-ratio: 4/1;
+  bottom: 40px;
+  border-radius: 1rem;
+  left: 50%;
+  transform: translate(-50%);
+  background-color: rgb(133, 189, 239);
+   min-width: 250px;      /* don’t get too small on phones */
+  max-width: 600px;      /* don’t get too huge on desktops */
+    display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#inputContainer input{
+  border-radius: 1rem;
+  border-style: none;
+  width: 80%;
+    outline: none;    
+     box-sizing: border-box;
+
+  height:50%;
+  font-size: clamp(0.8rem,150%,2rem);
+  text-align: center;
+  
+}

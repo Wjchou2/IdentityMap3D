@@ -2,50 +2,70 @@ import * as THREE from "three";
 
 import { FontLoader } from "https://unpkg.com/three@0.165.0/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "https://unpkg.com/three@0.165.0/examples/jsm/geometries/TextGeometry.js";
-
 const loader = new FontLoader();
-export function drawText(x, y, z, text) {
-    let textMesh;
+let cachedFont;
+export function preloadFont() {
     return new Promise((resolve, reject) => {
+        if (cachedFont) return resolve(cachedFont);
         loader.load(
             "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
             (font) => {
-                const textGeo = new TextGeometry(text, {
-                    font: font,
-                    size: 0.5, // text height
-                    depth: 0.1, // text depth (3D thickness)
-                    curveSegments: 12,
-                    bevelEnabled: true,
-                    bevelThickness: 0.02,
-                    bevelSize: 0.02,
-                    bevelOffset: 0,
-                    bevelSegments: 3,
-                });
-
-                const textMat = new THREE.MeshStandardMaterial({
-                    color: 0xffffff,
-                });
-
-                textGeo.computeBoundingBox();
-                const box = textGeo.boundingBox;
-                const width = box.max.x - box.min.x;
-                const height = box.max.y - box.min.y;
-
-                textMesh = new THREE.Mesh(textGeo, textMat);
-                textMesh.position.set(x - width / 2, y - height / 2, z);
-
-                resolve(textMesh);
-            }
+                cachedFont = font;
+                resolve(font);
+            },
+            undefined,
+            reject
         );
     });
 }
-let bulbs = [];
 
+export function drawLine(obj1, obj2) {
+    const pos1 = new THREE.Vector3();
+    const pos2 = new THREE.Vector3();
+    obj1.getWorldPosition(pos1);
+    obj2.getWorldPosition(pos2);
+    const curve = new THREE.LineCurve3(pos1, pos2);
+    const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.1, 16, false);
+    const tubeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff });
+    const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    return tube;
+}
+
+export function drawText(x, y, z, text) {
+    let textMesh = "";
+
+    const textGeo = new TextGeometry(text, {
+        font: cachedFont,
+        size: 0.5,
+        depth: 0.1,
+        curveSegments: 12,
+        bevelEnabled: true,
+        bevelThickness: 0.02,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 3,
+    });
+
+    const textMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+    });
+    textGeo.computeBoundingBox();
+    const box = textGeo.boundingBox;
+    const width = box.max.x - box.min.x;
+    const height = box.max.y - box.min.y;
+
+    textMesh = new THREE.Mesh(textGeo, textMat);
+    textMesh.position.set(x - width / 2, y - height / 2, z);
+
+    return textMesh;
+}
+
+let bulbs = [];
 export function drawBulb(x, y, radius) {
     const widthSegments = 32;
     const heightSegments = 16;
     const phiStart = 0;
-    const phiLength = Math.PI; // half of the sphere horizontally
+    const phiLength = Math.PI * 2; // half of the sphere horizontally
 
     const hemiGeometry = new THREE.SphereGeometry(
         radius,

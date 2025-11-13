@@ -1,18 +1,26 @@
-<!-- Import THREE.JS -->
-<script
-    async
-    src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
-></script>
-<link rel="stylesheet" href="style.css" type="text/css" media="all" />
-<script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
-            "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
-        }
-    }
-</script>
-<!-- Import CCapture -->
-<script src="lib/CCapture.all.min.js"></script>
+<!DOCTYPE html>
+<html>
+    <head>
+        <script
+            async
+            src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+        ></script>
+        <link rel="stylesheet" href="style.css" type="text/css" media="all" />
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.153.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.153.0/examples/jsm/"
+                }
+            }
+        </script>
+        <script src="lib/CCapture.all.min.js"></script>
 
-<script src="script.js" type="module"></script>
+        <script src="script.js" type="module"></script>
+    </head>
+    <body>
+        <div id="inputContainer">
+            <input id="input-main" placeholder="Enter" />
+        </div>
+    </body>
+</html>
