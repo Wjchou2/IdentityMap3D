@@ -25,18 +25,33 @@ export function drawLine(obj1, obj2) {
     obj1.getWorldPosition(pos1);
     obj2.getWorldPosition(pos2);
     const curve = new THREE.LineCurve3(pos1, pos2);
-    const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.1, 16, false);
+    const tubeGeometry = new THREE.TubeGeometry(curve, 20, 0.1, 100, false);
     const tubeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff });
     const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
+    tube.objA = obj1;
+    tube.objB = obj2;
     return tube;
 }
+export function updateLink(link) {
+    const pos1 = new THREE.Vector3();
+    const pos2 = new THREE.Vector3();
 
-export function drawText(x, y, z, text) {
+    link.objA.getWorldPosition(pos1);
+    link.objB.getWorldPosition(pos2);
+
+    const curve = new THREE.LineCurve3(pos1, pos2);
+
+    // replace geometry only, not the mesh
+    link.geometry.dispose();
+    link.geometry = new THREE.TubeGeometry(curve, 20, 0.4, 16, false);
+}
+
+export function drawText(x, y, z, text, size) {
     let textMesh = "";
 
     const textGeo = new TextGeometry(text, {
         font: cachedFont,
-        size: 0.5,
+        size: size / 5,
         depth: 0.1,
         curveSegments: 12,
         bevelEnabled: true,
