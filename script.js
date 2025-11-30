@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import * as methods from "/methods.js";
 import * as base from "/firebase.js";
+import * as wordHelper from "/wordHelper.js";
+
 import { OrbitControls } from "https://unpkg.com/three@0.165.0/examples/jsm/controls/OrbitControls.js";
 // import { json } from "express";
 const clock = new THREE.Clock();
@@ -39,28 +41,17 @@ async function drawAll() {
     if (Array.isArray(data.bulbs_data)) {
         data.bulbs_data.forEach((bulb) => {
             drawSphere(String(bulb.text), bulb.x, bulb.y);
-            console.log(bulb.x, bulb.y);
         });
     }
     data.bulbs_data = [];
 }
-// async function drawAll() {
 
-//     let data = await base.getData("siteData/bulbs");
-//     // console.log(data);
-//     for (const key in data) {
-//         data.bulbIndex++;
-
-//         drawSphere(String(key));
-//     }
-// }
 async function drawSphere(value, x, y) {
     value = value != undefined ? value : inputValue;
     let deg = Math.round(data.bulbIndex * 30) * (Math.PI / 180);
     let count = await base.getData("siteData/bulbs/" + value);
-    let radius = 1 + count / 10;
-
-    let bulb = methods.drawBulb(0, 0, 2);
+    let radius = 1 + count / 50;
+    let bulb = methods.drawBulb(0, 0, 2, value);
 
     bulb.scale.setScalar(0.001);
 
@@ -73,17 +64,17 @@ async function drawSphere(value, x, y) {
     });
     let textLabel = methods.drawText(
         bulb.position.x,
-        bulb.position.y + 0.5,
+        bulb.position.y + radius / 3,
         radius * 2,
         value,
-        count/2
+        radius
     );
     let textLabel2 = methods.drawText(
         bulb.position.x,
-        bulb.position.y - 0.5,
+        bulb.position.y - radius / 3,
         radius * 2,
-        `(${String(count)}${count == 1 ? " person" : " people"})`,
-         count/2
+        `(${String(count)}${count == 1 ? " prs" : " ppl"})`,
+        radius
     );
     const group = new THREE.Group();
     group.add(textLabel);
@@ -119,7 +110,10 @@ document.body.addEventListener("pointerdown", (event) => {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
     const intersects = raycaster.intersectObjects(bulbs, true);
-    if (intersects.length > 0 && intersects[0].object != mainBulb) {
+    if (
+        intersects.length > 0 &&
+        intersects[0].object.parent != mainBulb.parent
+    ) {
         draggedBulb = intersects[0].object.parent;
         controls.enabled = false;
     }
@@ -154,26 +148,71 @@ document.addEventListener("keydown", async function (event) {
     const tag = event.target.tagName.toLowerCase();
     inputValue = mainInput.value;
     if (event.code == "Enter" && mainInput.value != "") {
-        mainInput.value = "";
-        await base.incrementValue("siteData/bulbs", inputValue);
-        drawSphere();
+        if (wordHelper.hasIdentityLikeWord(inputValue)) {
+            mainInput.value = "";
+            await base.incrementValue("siteData/bulbs", inputValue);
+            drawSphere();
+        } else {
+            alert("Invalid Word");
+        }
+
+        if (tag == "input" || tag === "textarea") return;
     }
-    if (tag == "input" || tag === "textarea") return;
 });
 
 camera.position.z = 40;
+document.getElementById("removeAll").addEventListener("click", function () {
+    if (confirm("Reset Map?") == true) {
+        data.bulbs_data = [];
+        localStorage.removeItem("bulbs_data");
+        location.reload();
+    }
+});
+
+document.getElementById("resetCam").addEventListener("click", function () {
+    const changes = {
+        changeX: camera.position.x / 100,
+        changeY: camera.position.y / 100,
+        changeZ: (camera.position.z - 40) / 100,
+
+        rotateX: camera.rotation.x / 100,
+        rotateY: camera.rotation.y / 100,
+        rotateZ: camera.rotation.z / 100,
+    };
+
+    let count = 0;
+    let loop = setInterval(() => {
+        if (count == 100) clearInterval(loop);
+        count++;
+        camera.position.set(
+            camera.position.x - changes.changeX,
+            camera.position.y - changes.changeY,
+            camera.position.z - changes.changeZ
+        );
+        camera.rotation.set(
+            camera.rotation.x - changes.rotateX,
+            camera.rotation.y - changes.rotateY,
+            camera.rotation.z - changes.rotateZ
+        );
+    }, 1);
+    setTimeout(() => {
+        // camera.position.set(0, 0, 40);
+        controls.target.set(0, 0, 0); // keep orbit centered
+        controls.update();
+    }, 500);
+});
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enablePan = true;
 controls.enableZoom = true;
 
 let mainBulb;
 controls.minDistance = 3;
-controls.maxDistance = 200;
+controls.maxDistance = 1000;
 
 async function draw() {
-    mainBulb = methods.drawBulb(0, 0, 2);
+    mainBulb = methods.drawBulb(0, 0, 7);
     const group = new THREE.Group();
-    group.add(methods.drawText(0, 0, 2, "You", 2));
+    group.add(methods.drawText(0, 0, 7, "You", 7));
     group.add(mainBulb);
     scene.add(group);
     group.bulbMesh = mainBulb;
@@ -188,8 +227,8 @@ function updatePhysics() {
             if (i == j) continue;
             const bulb = bulbs[i];
             const bulb2 = bulbs[j];
-            const pA = new THREE.Vector3();
-            const pB = new THREE.Vector3();
+            const pA = new THREE.Vector3(0, 0, 0);
+            const pB = new THREE.Vector3(0, 0, 0);
             bulb.bulbMesh.getWorldPosition(pA);
             bulb2.bulbMesh.getWorldPosition(pB);
             // bulb.getWorldPosition(pA);
@@ -223,11 +262,7 @@ function updatePhysics() {
                     );
                 }
             }
-            console.log(
-                data.bulbs_data,
-                bulb.index,
-                data.bulbs_data[bulb.index]
-            );
+
             if (bulb.index !== undefined && data.bulbs_data[bulb.index]) {
                 data.bulbs_data[bulb.index].x = bulb.position.x;
                 data.bulbs_data[bulb.index].y = bulb.position.y;
@@ -241,8 +276,8 @@ function updatePhysics() {
 }
 setInterval(() => {
     localStorage.setItem("bulbs_data", JSON.stringify(data.bulbs_data));
-    // localStorage.setItem("bulb_index", JSON.stringify(data.bulbIndex));
 }, 500);
+
 function animate() {
     const now = clock.getElapsedTime();
 

@@ -2,6 +2,7 @@ import * as THREE from "three";
 
 import { FontLoader } from "https://unpkg.com/three@0.165.0/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "https://unpkg.com/three@0.165.0/examples/jsm/geometries/TextGeometry.js";
+
 const loader = new FontLoader();
 let cachedFont;
 export function preloadFont() {
@@ -18,6 +19,10 @@ export function preloadFont() {
         );
     });
 }
+// in methods.js (top-level loader)
+const texLoader = new THREE.TextureLoader();
+
+// in drawBulb, allow an optional texture URL
 
 export function drawLine(obj1, obj2) {
     const pos1 = new THREE.Vector3();
@@ -45,14 +50,23 @@ export function updateLink(link) {
     link.geometry.dispose();
     link.geometry = new THREE.TubeGeometry(curve, 20, 0.4, 16, false);
 }
+function fontSizeForBulb(radius) {
+    const baseRadius = 2; // your “You” bulb?
+    const baseSize = 1; // looks good at baseRadius
+    const minSize = 0.7;
+    const maxSize = 10;
+
+    const size = baseSize * (radius / baseRadius);
+    return Math.min(maxSize, Math.max(minSize, size));
+}
 
 export function drawText(x, y, z, text, size) {
     let textMesh = "";
 
     const textGeo = new TextGeometry(text, {
         font: cachedFont,
-        size: size / 5,
-        depth: 0.1,
+        size: fontSizeForBulb(size),
+        depth: 0.5,
         curveSegments: 12,
         bevelEnabled: true,
         bevelThickness: 0.02,
@@ -71,12 +85,10 @@ export function drawText(x, y, z, text, size) {
 
     textMesh = new THREE.Mesh(textGeo, textMat);
     textMesh.position.set(x - width / 2, y - height / 2, z);
-
     return textMesh;
 }
 
-let bulbs = [];
-export function drawBulb(x, y, radius) {
+export function drawBulb(x, y, radius, text) {
     const widthSegments = 32;
     const heightSegments = 16;
     const phiStart = 0;
@@ -89,6 +101,7 @@ export function drawBulb(x, y, radius) {
         phiStart,
         phiLength
     );
+
     const material = new THREE.MeshStandardMaterial({
         color: 0x00ff00,
         roughness: 0.4,
@@ -96,9 +109,5 @@ export function drawBulb(x, y, radius) {
     });
     const hemiSphere = new THREE.Mesh(hemiGeometry, material);
     hemiSphere.position.set(x, y, 0);
-    bulbs.push(hemiSphere);
     return hemiSphere;
-}
-export function getBulbs() {
-    return bulbs;
 }
