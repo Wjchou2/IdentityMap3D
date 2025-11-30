@@ -5,6 +5,7 @@
             async
             src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
         ></script>
+
         <link rel="stylesheet" href="style.css" type="text/css" media="all" />
         <script type="importmap">
             {
@@ -19,6 +20,10 @@
         <script src="script.js" type="module"></script>
     </head>
     <body>
+        <div id="settingContainer">
+            <div class="btn" id="resetCam"><span>Reset Cam</span></div>
+            <div class="btn" id="removeAll"><span>Remove All</span></div>
+        </div>
         <div id="inputContainer">
             <input id="input-main" placeholder="Enter" />
         </div>
