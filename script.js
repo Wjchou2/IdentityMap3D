@@ -9,7 +9,7 @@ const clock = new THREE.Clock();
 const poppingBulbs = [];
 const bulbs = [];
 const links = [];
-const mainInput = document.getElementById("input-main");
+const mainInput = document.getElementById("input-main-submit");
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -83,6 +83,7 @@ async function drawSphere(value, x, y) {
     scene.add(group);
     group.index = data.bulbIndex;
     group.bulbMesh = bulb;
+    group.textValue = value;
     group.radius = radius; // set real radius immediately
     group.position.copy(
         new THREE.Vector3(
@@ -102,7 +103,6 @@ async function drawSphere(value, x, y) {
     data.bulbIndex++;
 }
 let draggedBulb = null;
-
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 document.body.addEventListener("pointerdown", (event) => {
@@ -148,7 +148,20 @@ document.addEventListener("keydown", async function (event) {
     const tag = event.target.tagName.toLowerCase();
     inputValue = mainInput.value;
     if (event.code == "Enter" && mainInput.value != "") {
-        if (wordHelper.hasIdentityLikeWord(inputValue)) {
+        let guessed = false;
+        for (let i = 0; i < data.bulbs_data.length; i++) {
+            if (data.bulbs_data[i].text == inputValue) {
+                alert("Already guessed");
+                guessed = true;
+                break;
+            }
+        }
+        if (guessed) {
+            return;
+        }
+        let isWord = await wordHelper.isWord(inputValue);
+        console.log(isWord);
+        if (isWord && wordHelper.hasIdentityLikeWord(inputValue)) {
             mainInput.value = "";
             await base.incrementValue("siteData/bulbs", inputValue);
             drawSphere();
@@ -160,7 +173,7 @@ document.addEventListener("keydown", async function (event) {
     }
 });
 
-camera.position.z = 40;
+camera.position.z = 25;
 document.getElementById("removeAll").addEventListener("click", function () {
     if (confirm("Reset Map?") == true) {
         data.bulbs_data = [];
@@ -210,9 +223,9 @@ controls.minDistance = 3;
 controls.maxDistance = 1000;
 
 async function draw() {
-    mainBulb = methods.drawBulb(0, 0, 7);
+    mainBulb = methods.drawBulb(0, 0, 3);
     const group = new THREE.Group();
-    group.add(methods.drawText(0, 0, 7, "You", 7));
+    group.add(methods.drawText(0, 0, 3, "You", 3));
     group.add(mainBulb);
     scene.add(group);
     group.bulbMesh = mainBulb;
@@ -277,7 +290,20 @@ function updatePhysics() {
 setInterval(() => {
     localStorage.setItem("bulbs_data", JSON.stringify(data.bulbs_data));
 }, 500);
-
+async function updateall() {
+    let data = await base.getData("siteData/bulbs");
+    console.log(data);
+    Array.from(data).forEach(function (elm) {
+        for (let i = 0; i < bulbs.length; i++) {
+            if (bulbs[i] == elm) {
+                textValue;
+            }
+        }
+    });
+}
+setInterval(() => {
+    updateall();
+}, 1000);
 function animate() {
     const now = clock.getElapsedTime();
 

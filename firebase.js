@@ -33,7 +33,7 @@ export async function getData(data) {
     if (snapshot.exists()) {
         return snapshot.val();
     } else {
-        return null;
+        return 1;
     }
 }
 
