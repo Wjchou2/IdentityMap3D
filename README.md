@@ -13,6 +13,6 @@ A browser-based 3D “identity map” built with Three.js and Firebase. Type the
 
 ## Demo
 
-Try it out at [wjchou2.github.io/threejs](https://wjchou2.github.io/threejs/index.html)
+Try it out at [https://wjchou2.github.io/IdentityMap3D/index.html](https://wjchou2.github.io/IdentityMap3D/index.html)
 
 ![Identity Map Maker demo](demo.png)
