@@ -1,7 +1,7 @@
-import * as THREE from "three";
-import * as methods from "/methods.js";
-import * as base from "/firebase.js";
-import * as wordHelper from "/wordHelper.js";
+import * as THREE from "https://unpkg.com/three@0.161.0/build/three.module.js";
+import * as methods from "./methods.js";
+import * as base from "./firebase.js";
+import * as wordHelper from "./wordHelper.js";
 
 import { OrbitControls } from "https://unpkg.com/three@0.165.0/examples/jsm/controls/OrbitControls.js";
 // import { json } from "express";
@@ -18,8 +18,8 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-const dir = new THREE.DirectionalLight(0xffffff, 1);
+const ambient = new THREE.AmbientLight(0xffffff, 1.5);
+const dir = new THREE.DirectionalLight(0xffffff, 1.5);
 dir.position.set(5, 10, 7);
 scene.add(ambient, dir);
 
