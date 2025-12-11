@@ -12,6 +12,7 @@ A browser-based 3D “identity map” built with Three.js and Firebase. Type the
 -   “Remove All” resets the local map and clears saved positions; periodic sync keeps bulb sizes aligned with the latest Firebase data.
 
 ## Demo
-Try it out at https://wjchou2.github.io/threejs/index.html
+
+Try it out at [wjchou2.github.io/threejs](https://wjchou2.github.io/threejs/index.html)
 
 ![Identity Map Maker demo](demo.png)
