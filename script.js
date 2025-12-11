@@ -156,32 +156,38 @@ document.addEventListener("pointermove", async function (event) {
         }
     }
 });
+document
+    .getElementById("input-main-submit-btn")
+    .addEventListener("click", processWord);
+async function processWord() {
+    if (mainInput.value == "") return;
+    let guessed = false;
+    for (let i = 0; i < data.bulbs_data.length; i++) {
+        if (data.bulbs_data[i].text == inputValue) {
+            alert("Already Entered");
+            guessed = true;
+            break;
+        }
+    }
+    if (guessed) {
+        return;
+    }
+    let isWord = await wordHelper.isWord(inputValue);
+    if (isWord && wordHelper.hasIdentityLikeWord(inputValue)) {
+        mainInput.value = "";
+        await base.incrementValue("siteData/bulbs", inputValue);
+        drawSphere();
+    } else {
+        alert("Invalid Word");
+    }
 
+    if (tag == "input" || tag === "textarea") return;
+}
 document.addEventListener("keydown", async function (event) {
     const tag = event.target.tagName.toLowerCase();
     inputValue = mainInput.value;
-    if (event.code == "Enter" && mainInput.value != "") {
-        let guessed = false;
-        for (let i = 0; i < data.bulbs_data.length; i++) {
-            if (data.bulbs_data[i].text == inputValue) {
-                alert("Already guessed");
-                guessed = true;
-                break;
-            }
-        }
-        if (guessed) {
-            return;
-        }
-        let isWord = await wordHelper.isWord(inputValue);
-        if (isWord && wordHelper.hasIdentityLikeWord(inputValue)) {
-            mainInput.value = "";
-            await base.incrementValue("siteData/bulbs", inputValue);
-            drawSphere();
-        } else {
-            alert("Invalid Word");
-        }
-
-        if (tag == "input" || tag === "textarea") return;
+    if (event.code == "Enter") {
+        processWord();
     }
 });
 
@@ -194,19 +200,19 @@ document.getElementById("removeAll").addEventListener("click", function () {
     }
 });
 
-document.getElementById("share").addEventListener("click", function () {
-    let val = encodeURIComponent(JSON.stringify(data.bulbs_data));
-    const params = new URLSearchParams();
+// document.getElementById("share").addEventListener("click", function () {
+//     let val = encodeURIComponent(JSON.stringify(data.bulbs_data));
+//     const params = new URLSearchParams();
 
-    params.set("d", val);
+//     params.set("d", val);
 
-    const url =
-        window.location.origin +
-        window.location.pathname +
-        "?" +
-        params.toString();
-    console.log(url);
-});
+//     const url =
+//         window.location.origin +
+//         window.location.pathname +
+//         "?" +
+//         params.toString();
+//     console.log(url);
+// });
 
 document.getElementById("resetCam").addEventListener("click", function () {
     const changes = {

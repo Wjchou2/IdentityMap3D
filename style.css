@@ -28,21 +28,50 @@ html, body {
   text-align: center;
   
 }
+*{
+    font-family:"dosis";
+
+}
 .btn{
+
+ 
   text-align: center;
-align-content: center;
-border-radius: 1rem;
-color:rgb(73, 73, 73);
-font-family:Arial, Helvetica, sans-serif;
-cursor: pointer;
-  width: 10%;
-  aspect-ratio: 2/1;
+  align-content: center;
+  border-radius: 1rem;
+  color:rgb(73, 73, 73);
+  cursor: pointer;
+  width: 5%;
+    position: relative;
+  margin-left:95%;
+
+  aspect-ratio: 1/1;
   background-color: aliceblue;
-  position: relative;
+
   opacity: 0.5;
 }
 #settingContainer{
   position: absolute;
  width: 100%;
 
+}
+#title{
+  position: absolute;
+  margin-left: 2%;
+  color: aliceblue;
+}
+#input-main-submit-btn{
+  text-align: center;
+    display: flex;
+    justify-content: center; /* horizontal */
+    align-items: center;     /* vertical */
+  height:10%;
+  color: white;
+  aspect-ratio: 2/1;
+  background-color: rgb(6, 170, 6);
+  padding: 5%;
+  border-radius: 20px;
+
+}
+#input-main-submit-btn:hover{
+  background-color: rgb(3, 119, 3);
 }
