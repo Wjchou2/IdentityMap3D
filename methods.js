@@ -34,6 +34,7 @@ export function drawLine(obj1, obj2) {
     const tubeMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff });
     const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
     tube.objA = obj1;
+    tube.length = curve.getLength(); 
     tube.objB = obj2;
     return tube;
 }
@@ -43,10 +44,7 @@ export function updateLink(link) {
 
     link.objA.getWorldPosition(pos1);
     link.objB.getWorldPosition(pos2);
-
     const curve = new THREE.LineCurve3(pos1, pos2);
-
-    // replace geometry only, not the mesh
     link.geometry.dispose();
     link.geometry = new THREE.TubeGeometry(curve, 20, 0.4, 16, false);
 }

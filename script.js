@@ -36,6 +36,13 @@ const data = {
     bulbs_data: JSON.parse(localStorage.getItem("bulbs_data")),
 };
 data.bulbs_data = data.bulbs_data != null ? data.bulbs_data : [];
+const params = new URLSearchParams(window.location.search);
+const dataStr = params.get("d");
+let isViewer = false;
+if (dataStr != null) {
+    isViewer = true;
+    data.bulbs_data = JSON.parse(decodeURIComponent(dataStr));
+}
 let inputValue = "";
 async function drawAll() {
     if (Array.isArray(data.bulbs_data)) {
@@ -46,7 +53,7 @@ async function drawAll() {
     data.bulbs_data = [];
 }
 
-async function drawSphere(value, x, y) {
+async function drawSphere(value, x, y, index) {
     value = value != undefined ? value : inputValue;
     let deg = Math.round(data.bulbIndex * 30) * (Math.PI / 180);
     let count = await base.getData("siteData/bulbs/" + value);
@@ -81,9 +88,13 @@ async function drawSphere(value, x, y) {
     group.add(textLabel2);
     group.add(bulb);
     scene.add(group);
-    group.index = data.bulbIndex;
+
+    group.index = index != null ? index : data.bulbIndex;
     group.bulbMesh = bulb;
     group.textValue = value;
+    group.xPos = x;
+    group.yPos = y;
+    group.currentSize = count;
     group.radius = radius; // set real radius immediately
     group.position.copy(
         new THREE.Vector3(
@@ -91,16 +102,18 @@ async function drawSphere(value, x, y) {
             y != undefined ? y : 10 * Math.cos(deg)
         )
     );
-    bulbs.push(group);
+
     data.bulbs_data.push({
         x: 10 * Math.sin(deg),
         y: 10 * Math.cos(deg),
         text: value,
     });
     let link = methods.drawLine(mainBulb, bulb);
+    group.link = link;
     links.push(link);
     scene.add(link);
     data.bulbIndex++;
+    bulbs.push(group);
 }
 let draggedBulb = null;
 let raycaster = new THREE.Raycaster();
@@ -160,7 +173,6 @@ document.addEventListener("keydown", async function (event) {
             return;
         }
         let isWord = await wordHelper.isWord(inputValue);
-        console.log(isWord);
         if (isWord && wordHelper.hasIdentityLikeWord(inputValue)) {
             mainInput.value = "";
             await base.incrementValue("siteData/bulbs", inputValue);
@@ -175,11 +187,25 @@ document.addEventListener("keydown", async function (event) {
 
 camera.position.z = 25;
 document.getElementById("removeAll").addEventListener("click", function () {
-    if (confirm("Reset Map?") == true) {
+    if (confirm("Reset Map?")) {
         data.bulbs_data = [];
         localStorage.removeItem("bulbs_data");
         location.reload();
     }
+});
+
+document.getElementById("share").addEventListener("click", function () {
+    let val = encodeURIComponent(JSON.stringify(data.bulbs_data));
+    const params = new URLSearchParams();
+
+    params.set("d", val);
+
+    const url =
+        window.location.origin +
+        window.location.pathname +
+        "?" +
+        params.toString();
+    console.log(url);
 });
 
 document.getElementById("resetCam").addEventListener("click", function () {
@@ -229,11 +255,13 @@ async function draw() {
     group.add(mainBulb);
     scene.add(group);
     group.bulbMesh = mainBulb;
+
     group.radius = 2;
     bulbs.push(group);
     drawAll();
 }
 draw();
+
 function updatePhysics() {
     for (let i = 0; i < bulbs.length; i++) {
         for (let j = 0; j < bulbs.length; j++) {
@@ -244,15 +272,13 @@ function updatePhysics() {
             const pB = new THREE.Vector3(0, 0, 0);
             bulb.bulbMesh.getWorldPosition(pA);
             bulb2.bulbMesh.getWorldPosition(pB);
-            // bulb.getWorldPosition(pA);
-            // bulb2.getWorldPosition(pB);
-
             const centerDist = pA.distanceTo(pB);
             const minDist = bulb.radius + bulb2.radius;
             let overlap = minDist - centerDist;
+
             overlap *= -1;
 
-            if (overlap < 8) {
+            if (overlap < 4) {
                 const dir = pA.clone().sub(pB).normalize();
                 const force = Math.min(overlap * 0.1, 0.4); // cap max push per frame
 
@@ -277,33 +303,55 @@ function updatePhysics() {
             }
 
             if (bulb.index !== undefined && data.bulbs_data[bulb.index]) {
-                data.bulbs_data[bulb.index].x = bulb.position.x;
-                data.bulbs_data[bulb.index].y = bulb.position.y;
+                data.bulbs_data[bulb.index].x = roundtoTenth(bulb.position.x);
+                data.bulbs_data[bulb.index].y = roundtoTenth(bulb.position.y);
             }
             if (bulb2.index !== undefined && data.bulbs_data[bulb2.index]) {
-                data.bulbs_data[bulb2.index].x = bulb2.position.x;
-                data.bulbs_data[bulb2.index].y = bulb2.position.y;
+                data.bulbs_data[bulb2.index].x = roundtoTenth(bulb2.position.x);
+                data.bulbs_data[bulb2.index].y = roundtoTenth(bulb2.position.y);
             }
         }
     }
+}
+function roundtoTenth(num) {
+    return Math.round(num * 10) / 10;
 }
 setInterval(() => {
     localStorage.setItem("bulbs_data", JSON.stringify(data.bulbs_data));
 }, 500);
 async function updateall() {
-    let data = await base.getData("siteData/bulbs");
-    console.log(data);
-    Array.from(data).forEach(function (elm) {
-        for (let i = 0; i < bulbs.length; i++) {
-            if (bulbs[i] == elm) {
-                textValue;
+    let dataLive = await base.getData("siteData/bulbs");
+    Array(dataLive).forEach(function (elm) {
+        const len = bulbs.length;
+        for (let i = 0; i < len; i++) {
+            let currentBulb = bulbs[i];
+            if (
+                elm[currentBulb.textValue] != undefined &&
+                currentBulb.currentSize != elm[currentBulb.textValue]
+            ) {
+                scene.remove(bulbs[i].link);
+                bulbs.splice(i, 1);
+
+                links.splice(i, 1);
+                for (let j = 0; j < data.bulbs_data.length; j++) {
+                    if (data.bulbs_data[j].text == currentBulb.textValue) {
+                        data.bulbs_data.splice(j, 1);
+                    }
+                }
+                drawSphere(
+                    currentBulb.textValue,
+                    currentBulb.position.x,
+                    currentBulb.position.y,
+                    currentBulb.index
+                );
+                scene.remove(currentBulb);
             }
         }
     });
 }
 setInterval(() => {
     updateall();
-}, 1000);
+}, 2000);
 function animate() {
     const now = clock.getElapsedTime();
 
