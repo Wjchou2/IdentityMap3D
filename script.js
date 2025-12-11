@@ -351,7 +351,7 @@ async function updateall() {
 }
 setInterval(() => {
     updateall();
-}, 2000);
+}, 60000);
 function animate() {
     const now = clock.getElapsedTime();
 
