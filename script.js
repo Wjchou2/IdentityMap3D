@@ -162,6 +162,8 @@ document
 async function processWord() {
     if (mainInput.value == "") return;
     let guessed = false;
+    inputValue = mainInput.value.toLowerCase();
+
     for (let i = 0; i < data.bulbs_data.length; i++) {
         if (data.bulbs_data[i].text == inputValue) {
             alert("Already Entered");
@@ -185,7 +187,7 @@ async function processWord() {
 }
 document.addEventListener("keydown", async function (event) {
     const tag = event.target.tagName.toLowerCase();
-    inputValue = mainInput.value;
+    // inputValue = mainInput.value;
     if (event.code == "Enter") {
         processWord();
     }
@@ -198,6 +200,14 @@ document.getElementById("removeAll").addEventListener("click", function () {
         localStorage.removeItem("bulbs_data");
         location.reload();
     }
+});
+
+document.getElementById("start").addEventListener("click", function () {
+    document.getElementById("overlay").style.top = "-100%";
+    document.getElementById("overlay").style.opacity = 0;
+    setTimeout(() => {
+        document.getElementById("overlay").remove();
+    }, 1000);
 });
 
 // document.getElementById("share").addEventListener("click", function () {

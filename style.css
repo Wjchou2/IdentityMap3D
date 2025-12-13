@@ -33,27 +33,25 @@ html, body {
 
 }
 .btn{
-
- 
   text-align: center;
   align-content: center;
+
   border-radius: 1rem;
-  color:rgb(73, 73, 73);
+  color:rgb(255, 255, 255);
+  font-weight: 600;
   cursor: pointer;
   width: 5%;
-    position: relative;
+  position: relative;
+  margin: 5px;
   margin-left:95%;
-
   aspect-ratio: 1/1;
-  background-color: aliceblue;
-
-  opacity: 0.5;
+  background-color: rgb(131, 131, 131);
 }
 #settingContainer{
   position: absolute;
  width: 100%;
-
 }
+
 #title{
   position: absolute;
   margin-left: 2%;
@@ -62,8 +60,8 @@ html, body {
 #input-main-submit-btn{
   text-align: center;
     display: flex;
-    justify-content: center; /* horizontal */
-    align-items: center;     /* vertical */
+    justify-content: center; 
+    align-items: center;  
   height:10%;
   color: white;
   aspect-ratio: 2/1;
@@ -74,4 +72,50 @@ html, body {
 }
 #input-main-submit-btn:hover{
   background-color: rgb(3, 119, 3);
+}
+#overlay{
+  transition: all 1s;
+  top: 0%;
+  position:  absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(43, 43, 43);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 5vw;
+
+}
+
+#start{
+  margin: 1%;
+  height: 40%;
+  font-size: 50%;
+  border-radius: 10px;
+  background-color: rgb(1, 177, 1);
+  display: flex;
+  color:white;
+   justify-content: center;
+  align-items: center;
+  transition: all 0.15s;
+  border-style: solid;
+  cursor: pointer;
+}
+#start:hover{
+  transform: rotate(2deg)scale(1.1);
+    background-color: rgb(1, 141, 1);
+
+
+
+}
+
+#container{
+  color: white;
+    display: grid;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 50%;
+
 }
